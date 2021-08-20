@@ -67,16 +67,34 @@ public interface PaymentHistoryRepository extends PagingAndSortingRepository<Pay
 - 적용 후 REST API 의 테스트
 ```
 # order 서비스의 주문처리
-http localhost:8081/orders name="KimGangMin" cardNo=0 status="order started"
+http localhost:8081/orders name="KimGM" cardNo=0 status="order start"
 
 # payment 서비스의 결제처리
 http localhost:8088/paymentHistories orderId=1 cardNo=0000
 
 # reservation 서비스의 예약처리
-http localhost:8088/reservations orderId=3 status="confirmed"
+http localhost:8088/reservations orderId=1 status="confirmed"
 
-# 주문 상태 확인
-http localhost:8081/orders/3
+# 주문 상태 확인    
+http localhost:8081/orders/1
+HTTP/1.1 200
+Content-Type: application/hal+json;charset=UTF-8
+Date: Thu, 19 Aug 2021 02:05:39 GMT
+Transfer-Encoding: chunked
+
+{
+    "_links": {
+        "order": {
+            "href": "http://localhost:8081/orders/1"
+        },
+        "self": {
+            "href": "http://localhost:8081/orders/1"
+        }
+    },
+    "cardNo": 0,
+    "name": "KimGM",
+    "status": "order start"
+}
 
 ```
 
@@ -175,6 +193,10 @@ Transfer-Encoding: chunked
     "status": "Reservation Complete"
 }
 ```
+
+![order 1](https://user-images.githubusercontent.com/3106233/130169827-fe96f448-5523-4403-a1c5-be06a19c75f6.png)
+
+![order 2](https://user-images.githubusercontent.com/3106233/130169723-c70ec011-2106-46f2-a67e-d48af01757f1.png)
 
 
 ## 동기식 호출 과 Fallback 처리
@@ -285,7 +307,7 @@ transfer-encoding: chunked
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-결제가 이루어진 후에 상점시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 상점 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
+결제가 이루어진 후에 예약 시스템으로 이를 알려주는 행위는 동기식이 아니라 비 동기식으로 처리하여 예약 시스템의 처리를 위하여 결제주문이 블로킹 되지 않아도록 처리한다.
  
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
@@ -304,7 +326,7 @@ package yanolza;
 
     }
 ```
-- 상점 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
+- 예약 서비스에서는 결제승인 이벤트에 대해서 이를 수신하여 자신의 정책을 처리하도록 PolicyHandler 를 구현한다:
 
 ```
 package yanolza;
@@ -379,4 +401,3 @@ http localhost:8084/mypages     # 예약 상태가 "Reservation Complete"으로 
                 "status": "Reservation Complete"
             }
 ```
-
