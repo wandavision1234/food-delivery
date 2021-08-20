@@ -1,6 +1,7 @@
 ## DDD 의 적용
 
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다. 
+- 샘플은 payment.java
 
 ```
 package yanolza;
@@ -102,6 +103,8 @@ Transfer-Encoding: chunked
 ## Polyglot Persistence
 
 Polyglot Persistence를 위해 h2datase를 hsqldb로 변경
+
+rservation > pom.xml
 
 ```
 		<dependency>
